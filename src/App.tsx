@@ -1,26 +1,60 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import './App.scss';
+import { useQuery, gql } from "@apollo/client";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const FEMALE_CHARACTERS_QUERY = gql`
+    {
+        characters(filter: { gender: "female" }) {
+                results {
+                    id
+                    name
+                    status
+                    gender
+                    image
+                }
+            }
+    }
+`;
+
+const App = () => {
+
+    const { data, loading, error } = useQuery(FEMALE_CHARACTERS_QUERY);
+    const characters = data?.characters.results;
+    const [showCharacters, setShowCharacters] = useState(false);
+    
+    
+    if (loading) return <p className='loading'>Loading ...</p>;
+    if (error) return <p>{error.message}</p>;
+    
+    return (
+        <div className='main-container'>
+            <div className='button-container'>
+                <button
+                    onClick={() => setShowCharacters(!showCharacters)}
+                    className='button'
+                >
+                    Click me, Morty!
+                </button>
+            </div>
+            <div className='list-container'>
+                {
+                    showCharacters &&
+                    characters.map((character: any) => {
+                        return (
+                            <div key={character.id} className='item-list'>
+                                <img
+                                    src={character.image}
+                                    alt={character.name}
+                                    className='avatar'
+                                />
+                                {character.name}
+                            </div>
+                        );
+                    })
+                }
+            </div>
+        </div>
+    );
+};
 
 export default App;
